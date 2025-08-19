@@ -1,0 +1,50 @@
+[
+  {
+    "id": "link-001",
+    "title": "Company Website",
+    "url": "https://company.com",
+    "category": "Official",
+    "description": "Our main company website with all corporate information",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "link-002",
+    "title": "Employee Portal",
+    "url": "https://portal.company.com",
+    "category": "Internal",
+    "description": "Access employee resources, payroll, and HR information",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "link-003",
+    "title": "Help Desk",
+    "url": "https://help.company.com",
+    "category": "Support",
+    "description": "IT support tickets and technical assistance",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "link-004",
+    "title": "Project Management",
+    "url": "https://projects.company.com",
+    "category": "Internal",
+    "description": "Track projects, tasks, and team collaboration",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "link-005",
+    "title": "Customer Support",
+    "url": "https://support.company.com",
+    "category": "Support",
+    "description": "Customer service and support portal",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "link-006",
+    "title": "Documentation",
+    "url": "https://docs.company.com",
+    "category": "Resources",
+    "description": "Technical documentation and guides",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  }
+]
