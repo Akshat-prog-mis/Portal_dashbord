@@ -14,14 +14,11 @@ const fetcher = (url) => fetch(url).then((res) => res.json())
 
 // Category color mapping
 const categoryColors = {
-  'Official': 'bg-blue-500',
-  'Internal': 'bg-green-500',
-  'Support': 'bg-red-500',
-  'Resources': 'bg-purple-500',
-  'Tools': 'bg-yellow-500',
-  'Social': 'bg-pink-500',
-  'Development': 'bg-indigo-500',
-  'Finance': 'bg-orange-500'
+  'Google Sheets': 'bg-blue-500', // you can replace with image if needed
+  'Looker Studio': 'bg-green-500',
+  'Forms': 'bg-red-500',
+  'Miscellaneous': 'bg-purple-500',
+  'Delegation Dashboard': 'bg-yellow-500'
 }
 
 function CategoryCard({ category, links }) {
