@@ -1,15 +1,15 @@
-// app/admin/layout.js - ADMIN LAYOUT (MISSING)
-// ====================
+// app/admin/layout.js - UPDATED WITH ASSIGNMENTS
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useEffect } from 'react'
 
 export default function AdminLayout({ children }) {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     if (status === 'loading') return // Still loading
@@ -38,6 +38,8 @@ export default function AdminLayout({ children }) {
   if (!session || session.user.role !== 'admin') {
     return null
   }
+
+  const isActive = (path) => pathname === path
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,7 +80,11 @@ export default function AdminLayout({ children }) {
             <nav className="space-y-2">
               <Link
                 href="/admin"
-                className="block px-4 py-3 text-sm font-medium text-gray-900 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  isActive('/admin')
+                    ? 'text-gray-900 bg-gray-100'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
               >
                 <div className="flex items-center">
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +95,11 @@ export default function AdminLayout({ children }) {
               </Link>
               <Link
                 href="/admin/links"
-                className="block px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  isActive('/admin/links')
+                    ? 'text-gray-900 bg-gray-100'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
               >
                 <div className="flex items-center">
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,13 +110,32 @@ export default function AdminLayout({ children }) {
               </Link>
               <Link
                 href="/admin/users"
-                className="block px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  isActive('/admin/users')
+                    ? 'text-gray-900 bg-gray-100'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
               >
                 <div className="flex items-center">
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                   </svg>
                   Manage Users
+                </div>
+              </Link>
+              <Link
+                href="/admin/assignments"
+                className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  isActive('/admin/assignments')
+                    ? 'text-gray-900 bg-gray-100'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Link Assignments
                 </div>
               </Link>
             </nav>

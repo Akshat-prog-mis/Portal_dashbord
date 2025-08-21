@@ -1,3 +1,4 @@
+// pages/api/auth/[...nextauth].js - UPDATED WITH USER ID
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
@@ -44,12 +45,16 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id
         token.role = user.role
+        token.username = user.username
       }
       return token
     },
     async session({ session, token }) {
+      session.user.id = token.id
       session.user.role = token.role
+      session.user.username = token.username
       return session
     }
   },

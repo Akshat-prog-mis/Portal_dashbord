@@ -62,6 +62,9 @@ export default function AdminUsers() {
   if (error) return <div className="text-center py-12 text-red-600">Failed to load users</div>
   if (!users) return <div className="text-center py-12 text-gray-600">Loading...</div>
 
+  // Add this safety check - this is the key fix
+  const usersList = Array.isArray(users) ? users : []
+
   return (
     <div className="px-4 py-6 sm:px-0">
       <div className="flex justify-between items-center mb-8">
@@ -167,7 +170,7 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
+              {usersList.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
@@ -209,7 +212,7 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      {users.length === 0 && (
+      {usersList.length === 0 && (
         <div className="text-center py-12">
           <svg className="mx-auto h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
