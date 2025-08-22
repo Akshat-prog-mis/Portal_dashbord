@@ -12,5 +12,12 @@
     "password": "$2b$12$MtUoXB.oOPBk3PELGJ03Lu2nAhdJsT4FStH0gfO2cSSADXCY4mLJu",
     "role": "user",
     "created_at": "2024-01-02T00:00:00.000Z"
+  },
+  {
+    "id": "cc7659e8-ca5f-4ae6-b734-68c4a977229a",
+    "username": "akshat",
+    "password": "$2b$12$Xvlz7od6kFmhhzeQ9Fctreuphi/E37kJMcD8Q5Pm6LtLLDsdg0Day",
+    "role": "user",
+    "created_at": "2025-08-21T09:37:43.025Z"
   }
 ]

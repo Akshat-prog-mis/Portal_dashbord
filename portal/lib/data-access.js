@@ -139,6 +139,9 @@ export async function getUserByUsername(username) {
 
 export async function createUser(userData) {
   const users = readJsonFile(usersFilePath)
+
+  if (users.some(user=> user.username === userData.username)) {
+    throw new Error('Username already exists')}
   
   // Ensure role is either 'admin' or 'user'
   const role = userData.role === 'admin' ? 'admin' : 'user'
