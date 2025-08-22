@@ -106,11 +106,6 @@ export default function Login() {
             </button>
           </div>
           
-          <div className="text-center">
-            <div className="text-sm text-gray-600">
-              Demo credentials: <span className="font-medium">admin / admin123</span>
-            </div>
-          </div>
         </form>
       </div>
     </div>
