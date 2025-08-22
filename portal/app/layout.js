@@ -7,8 +7,8 @@ import { Providers } from './providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Link Management System',
-  description: 'Manage your company links efficiently',
+  title: 'Empolyee Dashbaord',
+  description: 'Manage your links efficiently',
 }
 
 export default function RootLayout({ children }) {
