@@ -1,10 +1,11 @@
-// app/page.js - UPDATED MAIN DASHBOARD
+// app/page.js - CLEANED VERSION
 'use client'
 
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import useSWR from 'swr'
+import { useRouter } from 'next/navigation'
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
@@ -14,12 +15,23 @@ const categoryColors = {
   'Looker Studio': 'bg-green-500',
   'Forms': 'bg-red-500',
   'Miscellaneous': 'bg-purple-500',
-  'Delegation Dashboard': 'bg-yellow-500'
+  'Delegation Dashboard': 'bg-yellow-500',
+  'Official': 'bg-indigo-500',
+  'Internal': 'bg-pink-500',
+  'Support': 'bg-teal-500',
+  'Resources': 'bg-orange-500',
+  'Tools': 'bg-cyan-500',
+  'Social': 'bg-lime-500',
+  'Development': 'bg-violet-500',
+  'Finance': 'bg-emerald-500'
 }
 
 function CategoryCard({ category, links }) {
   const [isExpanded, setIsExpanded] = useState(true)
   const bgColor = categoryColors[category] || 'bg-gray-500'
+  
+  // Safety check: Ensure links is always an array
+  const safeLinks = Array.isArray(links) ? links : []
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
@@ -33,7 +45,7 @@ function CategoryCard({ category, links }) {
             <div className="w-3 h-3 bg-white rounded-full opacity-75"></div>
             <h3 className="text-white text-xl font-bold">{category}</h3>
             <span className="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm font-medium">
-              {links.length} links
+              {safeLinks.length} links
             </span>
           </div>
           <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
@@ -48,7 +60,7 @@ function CategoryCard({ category, links }) {
       <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'max-h-full' : 'max-h-0'}`}>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {links.map((link) => (
+            {safeLinks.map((link) => (
               <div key={link.id} className="group relative bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                 <div className="flex items-start justify-between mb-3">
                   <h4 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
@@ -80,6 +92,13 @@ function CategoryCard({ category, links }) {
               </div>
             ))}
           </div>
+          
+          {/* Show message if no links */}
+          {safeLinks.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No links in this category
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -87,7 +106,14 @@ function CategoryCard({ category, links }) {
 }
 
 export default function Dashboard() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
   
   // Different API endpoints for admin vs user
   const apiEndpoint = session?.user?.role === 'admin' 
@@ -99,28 +125,56 @@ export default function Dashboard() {
     fetcher
   )
 
-  // Redirect to login if not authenticated
-  if (!session) {
+  // Show loading state while session is loading
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to Link Management System</h1>
-          <p className="text-gray-600 mb-6">Please login to access your assigned links</p>
-          <Link
-            href="/login"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
-          >
-            Login
-          </Link>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
   }
 
-  if (error) return <div className="text-center py-12 text-red-600">Failed to load links</div>
-  if (!categorizedLinks) return <div className="text-center py-12 text-gray-600">Loading...</div>
+  // Redirect to login if not authenticated
 
-  const categories = Object.keys(categorizedLinks).sort()
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">
+            <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Failed to load links
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!categorizedLinks) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your links...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // SAFETY CHECK: Ensure categorizedLinks is an object
+  const safeCategorizedLinks = categorizedLinks && typeof categorizedLinks === 'object' ? categorizedLinks : {}
+  const categories = Object.keys(safeCategorizedLinks).sort()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
@@ -139,29 +193,27 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-4">
-                <span className={`text-sm px-3 py-1 rounded-full ${
-                  session.user.role === 'admin' 
-                    ? 'text-red-700 bg-red-100' 
-                    : 'text-gray-700 bg-gray-100'
-                }`}>
-                  {session.user.role === 'admin' ? 'Admin' : 'User'}: {session.user.username}
-                </span>
-                {session.user.role === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105"
-                  >
-                    Admin Panel
-                  </Link>
-                )}
-                <button
-                  onClick={() => signOut()}
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              <span className={`text-sm px-3 py-1 rounded-full ${
+                session.user.role === 'admin' 
+                  ? 'text-red-700 bg-red-100' 
+                  : 'text-gray-700 bg-gray-100'
+              }`}>
+                {session.user.role === 'admin' ? 'Admin' : 'User'}: {session.user.username}
+              </span>
+              {session.user.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105"
                 >
-                  Logout
-                </button>
-              </div>
+                  Admin Panel
+                </Link>
+              )}
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -190,7 +242,7 @@ export default function Dashboard() {
                 <CategoryCard
                   key={category}
                   category={category}
-                  links={categorizedLinks[category]}
+                  links={safeCategorizedLinks[category]}
                 />
               ))}
             </div>
@@ -200,7 +252,7 @@ export default function Dashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
               <h3 className="text-xl font-medium text-gray-900 mt-4">
-                {session.user.role === 'admin' ? 'No links found' : 'No links assigned to you'}
+                {session.user.role === 'admin' ? 'No links found' : 'No links assigned to you yet'}
               </h3>
               <p className="text-gray-600 mt-2">
                 {session.user.role === 'admin' 
@@ -217,7 +269,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                 <div>
                   <div className="text-3xl font-bold text-blue-600">
-                    {Object.values(categorizedLinks).flat().length}
+                    {Object.values(safeCategorizedLinks).flat().length}
                   </div>
                   <div className="text-gray-600">
                     {session.user.role === 'admin' ? 'Total Links' : 'Assigned Links'}
