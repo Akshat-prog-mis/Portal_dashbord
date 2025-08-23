@@ -16,9 +16,11 @@ export default function AdminLinks() {
     description: ''
   })
 
-  const predefinedCategories = [
-    'Official', 'Internal', 'Support', 'Resources', 
-    'Tools', 'Social', 'Development', 'Finance'
+  const predefinedCategories = ['Google Sheets',
+  'Looker Studio',
+  'Forms',
+  'Miscellaneous',
+  'Dashboard'
   ]
 
   const handleSubmit = async (e) => {

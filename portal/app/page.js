@@ -15,15 +15,7 @@ const categoryColors = {
   'Looker Studio': 'bg-green-500',
   'Forms': 'bg-red-500',
   'Miscellaneous': 'bg-purple-500',
-  'Delegation Dashboard': 'bg-yellow-500',
-  'Official': 'bg-indigo-500',
-  'Internal': 'bg-pink-500',
-  'Support': 'bg-teal-500',
-  'Resources': 'bg-orange-500',
-  'Tools': 'bg-cyan-500',
-  'Social': 'bg-lime-500',
-  'Development': 'bg-violet-500',
-  'Finance': 'bg-emerald-500'
+  'Dashboard': 'bg-yellow-500',
 }
 
 function CategoryCard({ category, links }) {

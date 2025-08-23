@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation'
 export default function Login() {
   const [credentials, setCredentials] = useState({
     username: '',
-    password: ''
+    password: '',
+    remember: false
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,13 +23,15 @@ export default function Login() {
       const result = await signIn('credentials', {
         username: credentials.username,
         password: credentials.password,
+        remember: credentials.remember.toString(),
         redirect: false
       })
 
       if (result?.error) {
-        setError('Invalid credentials')
+        setError('Invalid username or password')
         setLoading(false)
       } else {
+        // Get the session to check user role
         const session = await getSession()
         if (session?.user?.role === 'admin') {
           router.push('/admin')
@@ -37,7 +40,8 @@ export default function Login() {
         }
       }
     } catch (error) {
-      setError('Login failed')
+      console.error('Login error:', error)
+      setError('Login failed. Please try again.')
       setLoading(false)
     }
   }
@@ -54,6 +58,7 @@ export default function Login() {
           </h2>
           <p className="text-gray-600 mt-2">Sign in to access your dashboard</p>
         </div>
+        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -72,6 +77,7 @@ export default function Login() {
                 })}
               />
             </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -88,6 +94,22 @@ export default function Login() {
                 })}
               />
             </div>
+
+            <div className="flex items-center">
+              <input
+                id="remember"
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                checked={credentials.remember}
+                onChange={(e) => setCredentials({
+                  ...credentials,
+                  remember: e.target.checked
+                })}
+              />
+              <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
+                Remember me for 30 days
+              </label>
+            </div>
           </div>
 
           {error && (
@@ -102,10 +124,22 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200 transform hover:scale-[1.02] font-medium"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Signing in...
+                </div>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </div>
           
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              Contact your administrator for account access
+            </p>
+          </div>
         </form>
       </div>
     </div>

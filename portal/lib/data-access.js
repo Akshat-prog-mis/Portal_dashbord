@@ -1,284 +1,385 @@
-// lib/data-access.js - ENHANCED VERSION
-import fs from 'fs'
-import path from 'path'
+// lib/data-access.js - ROBUST SUPABASE VERSION
 import bcrypt from 'bcryptjs'
-import { v4 as uuidv4 } from 'uuid'
+import { supabaseAdmin, testSupabaseConnection } from './supabase'
 
-const linksFilePath = path.join(process.cwd(), 'data', 'links.json')
-const usersFilePath = path.join(process.cwd(), 'data', 'users.json')
-const assignmentsFilePath = path.join(process.cwd(), 'data', 'user-link-assignments.json')
+// // Test connection on startup
+// testSupabaseConnection()
 
-// Utility functions for file operations
-function readJsonFile(filePath) {
+// Users CRUD operations
+export async function getUsers() {
   try {
-    const fileContents = fs.readFileSync(filePath, 'utf8')
-    return JSON.parse(fileContents)
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('id, username, role, created_at')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Supabase error fetching users:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return data || []
   } catch (error) {
-    console.error(`Error reading file ${filePath}:`, error)
-    return []
+    console.error('Error fetching users:', error)
+    throw new Error('Failed to fetch users')
   }
 }
 
-function writeJsonFile(filePath, data) {
+export async function getUserByUsername(username) {
   try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+    console.log('Fetching user by username:', username)
+    
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .maybeSingle() // Use maybeSingle instead of single to handle no results gracefully
+
+    if (error) {
+      console.error('Supabase error fetching user by username:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    console.log('User found:', data ? 'YES' : 'NO')
+    return data
+  } catch (error) {
+    console.error('Error fetching user by username:', error)
+    throw error
+  }
+}
+
+export async function getUserById(id) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('id, username, role, created_at')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Supabase error fetching user by ID:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return data
+  } catch (error) {
+    console.error('Error fetching user by ID:', error)
+    throw new Error('Failed to fetch user')
+  }
+}
+
+export async function createUser(userData) {
+  try {
+    // Check if user already exists
+    const existingUser = await getUserByUsername(userData.username)
+    if (existingUser) {
+      throw new Error('Username already exists')
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(userData.password, 12)
+    
+    // Ensure role is either 'admin' or 'user'
+    const role = userData.role === 'admin' ? 'admin' : 'user'
+    
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .insert([{
+        username: userData.username,
+        password_hash: hashedPassword,
+        role: role
+      }])
+      .select('id, username, role, created_at')
+      .single()
+
+    if (error) {
+      console.error('Supabase error creating user:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return data
+  } catch (error) {
+    console.error('Error creating user:', error)
+    throw error
+  }
+}
+
+export async function deleteUser(id) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Supabase error deleting user:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
     return true
   } catch (error) {
-    console.error(`Error writing file ${filePath}:`, error)
-    return false
+    console.error('Error deleting user:', error)
+    throw new Error('Failed to delete user')
   }
 }
 
 // Links CRUD operations
 export async function getLinks() {
-  return readJsonFile(linksFilePath)
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('links')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Supabase error fetching links:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Error fetching links:', error)
+    throw new Error('Failed to fetch links')
+  }
 }
 
 export async function getLinksByCategory() {
-  const links = readJsonFile(linksFilePath)
-  const categories = {}
-  
-  links.forEach(link => {
-    if (!categories[link.category]) {
-      categories[link.category] = []
-    }
-    categories[link.category].push(link)
-  })
-  
-  return categories
+  try {
+    const links = await getLinks()
+    const categories = {}
+    
+    links.forEach(link => {
+      if (!categories[link.category]) {
+        categories[link.category] = []
+      }
+      categories[link.category].push(link)
+    })
+    
+    return categories
+  } catch (error) {
+    console.error('Error getting links by category:', error)
+    throw error
+  }
 }
 
-// Get links assigned to specific user
 export async function getUserAssignedLinks(userId) {
-  const assignments = readJsonFile(assignmentsFilePath)
-  const links = readJsonFile(linksFilePath)
-  
-  const userAssignments = assignments.filter(assignment => assignment.userId === userId)
-  const assignedLinkIds = userAssignments.map(assignment => assignment.linkId)
-  
-  const assignedLinks = links.filter(link => assignedLinkIds.includes(link.id))
-  
-  // Group by category
-  const categories = {}
-  assignedLinks.forEach(link => {
-    if (!categories[link.category]) {
-      categories[link.category] = []
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('user_link_assignments')
+      .select(`
+        *,
+        links (*)
+      `)
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('Supabase error fetching user assigned links:', error)
+      throw new Error(`Database error: ${error.message}`)
     }
-    categories[link.category].push(link)
-  })
-  
-  return categories
+
+    // Group by category
+    const categories = {}
+    data.forEach(assignment => {
+      const link = assignment.links
+      if (link) {
+        if (!categories[link.category]) {
+          categories[link.category] = []
+        }
+        categories[link.category].push(link)
+      }
+    })
+    
+    return categories
+  } catch (error) {
+    console.error('Error fetching user assigned links:', error)
+    throw new Error('Failed to fetch assigned links')
+  }
 }
 
 export async function createLink(linkData) {
-  const links = readJsonFile(linksFilePath)
-  const newLink = {
-    id: uuidv4(),
-    ...linkData,
-    created_at: new Date().toISOString()
-  }
-  
-  links.push(newLink)
-  
-  if (writeJsonFile(linksFilePath, links)) {
-    return newLink
-  } else {
-    throw new Error('Failed to save link')
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('links')
+      .insert([linkData])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase error creating link:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return data
+  } catch (error) {
+    console.error('Error creating link:', error)
+    throw error
   }
 }
 
 export async function updateLink(id, linkData) {
-  const links = readJsonFile(linksFilePath)
-  const linkIndex = links.findIndex(link => link.id === id)
-  
-  if (linkIndex === -1) {
-    throw new Error('Link not found')
-  }
-  
-  links[linkIndex] = { ...links[linkIndex], ...linkData }
-  
-  if (writeJsonFile(linksFilePath, links)) {
-    return links[linkIndex]
-  } else {
-    throw new Error('Failed to update link')
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('links')
+      .update(linkData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase error updating link:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return data
+  } catch (error) {
+    console.error('Error updating link:', error)
+    throw error
   }
 }
 
 export async function deleteLink(id) {
-  const links = readJsonFile(linksFilePath)
-  const assignments = readJsonFile(assignmentsFilePath)
-  
-  // Remove link
-  const filteredLinks = links.filter(link => link.id !== id)
-  
-  // Remove all assignments for this link
-  const filteredAssignments = assignments.filter(assignment => assignment.linkId !== id)
-  
-  if (writeJsonFile(linksFilePath, filteredLinks) && writeJsonFile(assignmentsFilePath, filteredAssignments)) {
-    return true
-  } else {
-    throw new Error('Failed to delete link')
-  }
-}
+  try {
+    const { error } = await supabaseAdmin
+      .from('links')
+      .delete()
+      .eq('id', id)
 
-// Users CRUD operations (simplified to only admin/user)
-export async function getUsers() {
-  const users = readJsonFile(usersFilePath)
-  return users.map(user => ({
-    id: user.id,
-    username: user.username,
-    role: user.role, // Only 'admin' or 'user'
-    created_at: user.created_at
-  }))
-}
-
-export async function getUserByUsername(username) {
-  const users = readJsonFile(usersFilePath)
-  return users.find(user => user.username === username)
-}
-
-export async function createUser(userData) {
-  const users = readJsonFile(usersFilePath)
-
-  if (users.some(user=> user.username === userData.username)) {
-    throw new Error('Username already exists')}
-  
-  // Ensure role is either 'admin' or 'user'
-  const role = userData.role === 'admin' ? 'admin' : 'user'
-  
-  const hashedPassword = await bcrypt.hash(userData.password, 12)
-  
-  const newUser = {
-    id: uuidv4(),
-    username: userData.username,
-    password: hashedPassword,
-    role: role,
-    created_at: new Date().toISOString()
-  }
-  
-  users.push(newUser)
-  
-  if (writeJsonFile(usersFilePath, users)) {
-    return {
-      id: newUser.id,
-      username: newUser.username,
-      role: newUser.role,
-      created_at: newUser.created_at
+    if (error) {
+      console.error('Supabase error deleting link:', error)
+      throw new Error(`Database error: ${error.message}`)
     }
-  } else {
-    throw new Error('Failed to create user')
-  }
-}
 
-export async function deleteUser(id) {
-  const users = readJsonFile(usersFilePath)
-  const assignments = readJsonFile(assignmentsFilePath)
-  
-  // Remove user
-  const filteredUsers = users.filter(user => user.id !== id)
-  
-  // Remove all assignments for this user
-  const filteredAssignments = assignments.filter(assignment => assignment.userId !== id)
-  
-  if (writeJsonFile(usersFilePath, filteredUsers) && writeJsonFile(assignmentsFilePath, filteredAssignments)) {
     return true
-  } else {
-    throw new Error('Failed to delete user')
+  } catch (error) {
+    console.error('Error deleting link:', error)
+    throw error
   }
 }
 
 // User-Link Assignment Operations
 export async function assignLinkToUser(userId, linkId) {
-  const assignments = readJsonFile(assignmentsFilePath)
-  
-  // Check if assignment already exists
-  const existingAssignment = assignments.find(
-    assignment => assignment.userId === userId && assignment.linkId === linkId
-  )
-  
-  if (existingAssignment) {
-    throw new Error('Link already assigned to user')
-  }
-  
-  const newAssignment = {
-    id: uuidv4(),
-    userId: userId,
-    linkId: linkId,
-    assigned_at: new Date().toISOString()
-  }
-  
-  assignments.push(newAssignment)
-  
-  if (writeJsonFile(assignmentsFilePath, assignments)) {
-    return newAssignment
-  } else {
-    throw new Error('Failed to assign link to user')
+  try {
+    // Check if assignment already exists
+    const { data: existing, error: checkError } = await supabaseAdmin
+      .from('user_link_assignments')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('link_id', linkId)
+      .maybeSingle()
+
+    if (checkError) {
+      console.error('Error checking existing assignment:', checkError)
+      throw new Error(`Database error: ${checkError.message}`)
+    }
+
+    if (existing) {
+      throw new Error('Link already assigned to user')
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('user_link_assignments')
+      .insert([{
+        user_id: userId,
+        link_id: linkId
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase error assigning link:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return data
+  } catch (error) {
+    console.error('Error assigning link to user:', error)
+    throw error
   }
 }
 
 export async function unassignLinkFromUser(userId, linkId) {
-  const assignments = readJsonFile(assignmentsFilePath)
-  const filteredAssignments = assignments.filter(
-    assignment => !(assignment.userId === userId && assignment.linkId === linkId)
-  )
-  
-  if (writeJsonFile(assignmentsFilePath, filteredAssignments)) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('user_link_assignments')
+      .delete()
+      .eq('user_id', userId)
+      .eq('link_id', linkId)
+
+    if (error) {
+      console.error('Supabase error unassigning link:', error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
     return true
-  } else {
-    throw new Error('Failed to unassign link from user')
+  } catch (error) {
+    console.error('Error unassigning link from user:', error)
+    throw error
   }
 }
 
 export async function getUserAssignments(userId) {
-  const assignments = readJsonFile(assignmentsFilePath)
-  const links = readJsonFile(linksFilePath)
-  
-  const userAssignments = assignments.filter(assignment => assignment.userId === userId)
-  
-  return userAssignments.map(assignment => {
-    const link = links.find(link => link.id === assignment.linkId)
-    return {
-      ...assignment,
-      link: link
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('user_link_assignments')
+      .select(`
+        *,
+        links (*)
+      `)
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('Supabase error fetching user assignments:', error)
+      throw new Error(`Database error: ${error.message}`)
     }
-  })
+
+    return data || []
+  } catch (error) {
+    console.error('Error fetching user assignments:', error)
+    throw error
+  }
 }
 
 export async function getLinkAssignments(linkId) {
-  const assignments = readJsonFile(assignmentsFilePath)
-  const users = readJsonFile(usersFilePath)
-  
-  const linkAssignments = assignments.filter(assignment => assignment.linkId === linkId)
-  
-  return linkAssignments.map(assignment => {
-    const user = users.find(user => user.id === assignment.userId)
-    return {
-      ...assignment,
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role
-      }
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('user_link_assignments')
+      .select(`
+        *,
+        users (id, username, role)
+      `)
+      .eq('link_id', linkId)
+
+    if (error) {
+      console.error('Supabase error fetching link assignments:', error)
+      throw new Error(`Database error: ${error.message}`)
     }
-  })
+
+    return data || []
+  } catch (error) {
+    console.error('Error fetching link assignments:', error)
+    throw error
+  }
 }
 
 export async function getAllAssignments() {
-  const assignments = readJsonFile(assignmentsFilePath)
-  const users = readJsonFile(usersFilePath)
-  const links = readJsonFile(linksFilePath)
-  
-  return assignments.map(assignment => {
-    const user = users.find(user => user.id === assignment.userId)
-    const link = links.find(link => link.id === assignment.linkId)
-    return {
-      ...assignment,
-      user: user ? {
-        id: user.id,
-        username: user.username,
-        role: user.role
-      } : null,
-      link: link || null
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('user_link_assignments')
+      .select(`
+        *,
+        users (id, username, role),
+        links (*)
+      `)
+      .order('assigned_at', { ascending: false })
+
+    if (error) {
+      console.error('Supabase error fetching all assignments:', error)
+      throw new Error(`Database error: ${error.message}`)
     }
-  })
+
+    return data || []
+  } catch (error) {
+    console.error('Error fetching all assignments:', error)
+    throw error
+  }
 }
