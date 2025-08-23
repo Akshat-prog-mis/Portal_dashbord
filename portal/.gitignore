@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+portal/pages/api/create-admin.js
+portal/pages/test-supabase.js
+portal/pages/api/test-direct.js
+portal/pages/test.js
