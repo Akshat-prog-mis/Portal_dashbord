@@ -1,98 +1,99 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import useSWR, { mutate } from 'swr'
+import { useState } from "react";
+import useSWR, { mutate } from "swr";
 
-const fetcher = (url) => fetch(url).then((res) => res.json())
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function AdminLinks() {
-  const { data: links, error } = useSWR('/api/links', fetcher)
-  const [showForm, setShowForm] = useState(false)
-  const [editingLink, setEditingLink] = useState(null)
+  const { data: links, error } = useSWR("/api/links", fetcher);
+  const [showForm, setShowForm] = useState(false);
+  const [editingLink, setEditingLink] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    url: '',
-    category: '',
-    description: ''
-  })
+    title: "",
+    url: "",
+    category: "",
+    description: "",
+  });
 
-  const predefinedCategories = ['Google Sheets',
-  'Looker Studio',
-  'Forms',
-  'Miscellaneous',
-  'Dashboard'
-  ]
+  const predefinedCategories = [
+    "Google Sheets",
+    "Looker Studio",
+    "Forms",
+    "Miscellaneous",
+    "Dashboard",
+  ];
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     try {
-      const method = editingLink ? 'PUT' : 'POST'
-      const url = editingLink ? `/api/links/${editingLink.id}` : '/api/links'
-      
+      const method = editingLink ? "PUT" : "POST";
+      const url = editingLink ? `/api/links/${editingLink.id}` : "/api/links";
+
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (response.ok) {
-        mutate('/api/links')
-        mutate('/api/links?grouped=true')
-        setShowForm(false)
-        setEditingLink(null)
-        setFormData({ title: '', url: '', category: '', description: '' })
+        mutate("/api/links");
+        mutate("/api/links?grouped=true");
+        setShowForm(false);
+        setEditingLink(null);
+        setFormData({ title: "", url: "", category: "", description: "" });
       } else {
-        const errorData = await response.json()
-        alert(`Error: ${errorData.error || 'Failed to save link'}`)
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error || "Failed to save link"}`);
       }
     } catch (error) {
-      console.error('Error saving link:', error)
-      alert('Error saving link')
+      console.error("Error saving link:", error);
+      alert("Error saving link");
     }
-  }
+  };
 
   const handleEdit = (link) => {
-    setEditingLink(link)
+    setEditingLink(link);
     setFormData({
       title: link.title,
       url: link.url,
       category: link.category,
-      description: link.description
-    })
-    setShowForm(true)
-  }
+      description: link.description,
+    });
+    setShowForm(true);
+  };
 
   const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this link?')) {
+    if (confirm("Are you sure you want to delete this link?")) {
       try {
         const response = await fetch(`/api/links/${id}`, {
-          method: 'DELETE',
-        })
+          method: "DELETE",
+        });
 
         if (response.ok) {
-          mutate('/api/links')
-          mutate('/api/links?grouped=true')
+          mutate("/api/links");
+          mutate("/api/links?grouped=true");
         } else {
-          alert('Error deleting link')
+          alert("Error deleting link");
         }
       } catch (error) {
-        console.error('Error deleting link:', error)
-        alert('Error deleting link')
+        console.error("Error deleting link:", error);
+        alert("Error deleting link");
       }
     }
-  }
+  };
 
   const resetForm = () => {
-    setShowForm(false)
-    setEditingLink(null)
-    setFormData({ title: '', url: '', category: '', description: '' })
-  }
+    setShowForm(false);
+    setEditingLink(null);
+    setFormData({ title: "", url: "", category: "", description: "" });
+  };
 
-  if (error) return <div className="text-center py-12 text-red-600">Failed to load links</div>
-  if (!links) return <div className="text-center py-12 text-gray-600">Loading...</div>
+  if (error) return <div className="text-center py-12 text-red-600">Failed to load links</div>;
+  if (!links) return <div className="text-center py-12 text-gray-600">Loading...</div>;
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -115,14 +116,12 @@ export default function AdminLinks() {
       {showForm && (
         <div className="bg-white shadow-xl rounded-2xl p-8 mb-8 border border-gray-200">
           <h3 className="text-2xl font-bold text-gray-900 mb-6">
-            {editingLink ? 'Edit Link' : 'Add New Link'}
+            {editingLink ? "Edit Link" : "Add New Link"}
           </h3>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Title *
-                </label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
                 <input
                   type="text"
                   required
@@ -133,9 +132,7 @@ export default function AdminLinks() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category *
-                </label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
                 <select
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -143,16 +140,16 @@ export default function AdminLinks() {
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 >
                   <option value="">Select a category</option>
-                  {predefinedCategories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                  {predefinedCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                URL *
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">URL *</label>
               <input
                 type="url"
                 required
@@ -163,9 +160,7 @@ export default function AdminLinks() {
               />
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Description
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
               <textarea
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -179,7 +174,7 @@ export default function AdminLinks() {
                 type="submit"
                 className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 transform hover:scale-105 font-medium"
               >
-                {editingLink ? 'Update Link' : 'Create Link'}
+                {editingLink ? "Update Link" : "Create Link"}
               </button>
               <button
                 type="button"
@@ -217,12 +212,8 @@ export default function AdminLinks() {
                 <tr key={link.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {link.title}
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {link.description}
-                      </div>
+                      <div className="text-lg font-semibold text-gray-900">{link.title}</div>
+                      <div className="text-sm text-gray-600 mt-1">{link.description}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -262,16 +253,26 @@ export default function AdminLinks() {
           </table>
         </div>
       </div>
-      
+
       {links.length === 0 && (
         <div className="text-center py-12">
-          <svg className="mx-auto h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          <svg
+            className="mx-auto h-24 w-24 text-gray-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+            />
           </svg>
           <h3 className="text-xl font-medium text-gray-900 mt-4">No links found</h3>
           <p className="text-gray-600 mt-2">Get started by adding your first link.</p>
         </div>
       )}
     </div>
-  )
+  );
 }

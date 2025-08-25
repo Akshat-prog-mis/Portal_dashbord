@@ -1,45 +1,45 @@
 // app/admin/layout.js - UPDATED WITH ASSIGNMENTS
-'use client'
+"use client";
 
-import { useSession } from 'next-auth/react'
-import { useRouter, usePathname } from 'next/navigation'
-import Link from 'next/link'
-import { useEffect } from 'react'
+import { useSession } from "next-auth/react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { useEffect } from "react";
 
 export default function AdminLayout({ children }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (status === 'loading') return // Still loading
+    if (status === "loading") return; // Still loading
 
     if (!session) {
-      router.push('/login')
-      return
+      router.push("/login");
+      return;
     }
 
-    if (session.user.role !== 'admin') {
-      router.push('/')
-      return
+    if (session.user.role !== "admin") {
+      router.push("/");
+      return;
     }
-  }, [session, status, router])
+  }, [session, status, router]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-lg text-gray-600">Loading...</div>
         </div>
       </div>
-    )
+    );
   }
 
-  if (!session || session.user.role !== 'admin') {
-    return null
+  if (!session || session.user.role !== "admin") {
+    return null;
   }
 
-  const isActive = (path) => pathname === path
+  const isActive = (path) => pathname === path;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -52,9 +52,7 @@ export default function AdminLayout({ children }) {
                 <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">A</span>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">
-                  Admin Panel
-                </h1>
+                <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -81,14 +79,24 @@ export default function AdminLayout({ children }) {
               <Link
                 href="/admin"
                 className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive('/admin')
-                    ? 'text-gray-900 bg-gray-100'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  isActive("/admin")
+                    ? "text-gray-900 bg-gray-100"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                  <svg
+                    className="w-5 h-5 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                    />
                   </svg>
                   Dashboard
                 </div>
@@ -96,14 +104,24 @@ export default function AdminLayout({ children }) {
               <Link
                 href="/admin/links"
                 className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive('/admin/links')
-                    ? 'text-gray-900 bg-gray-100'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  isActive("/admin/links")
+                    ? "text-gray-900 bg-gray-100"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  <svg
+                    className="w-5 h-5 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    />
                   </svg>
                   Manage Links
                 </div>
@@ -111,14 +129,24 @@ export default function AdminLayout({ children }) {
               <Link
                 href="/admin/users"
                 className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive('/admin/users')
-                    ? 'text-gray-900 bg-gray-100'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  isActive("/admin/users")
+                    ? "text-gray-900 bg-gray-100"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                  <svg
+                    className="w-5 h-5 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+                    />
                   </svg>
                   Manage Users
                 </div>
@@ -126,14 +154,24 @@ export default function AdminLayout({ children }) {
               <Link
                 href="/admin/assignments"
                 className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive('/admin/assignments')
-                    ? 'text-gray-900 bg-gray-100'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  isActive("/admin/assignments")
+                    ? "text-gray-900 bg-gray-100"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-5 h-5 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   Link Assignments
                 </div>
@@ -143,10 +181,8 @@ export default function AdminLayout({ children }) {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
-          {children}
-        </div>
+        <div className="flex-1 p-8">{children}</div>
       </div>
     </div>
-  )
+  );
 }
