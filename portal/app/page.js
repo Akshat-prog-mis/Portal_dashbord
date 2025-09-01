@@ -203,10 +203,10 @@ export default function Dashboard() {
             <div className="flex items-center">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">L</span>
+                  <span className="text-white font-bold text-lg">A</span>
                 </div>
                 <h1 className="text-xl font-bold text-gray-900">
-                  {session.user.role === "admin" ? "Company Links Dashboard" : "My Assigned Links"}
+                  {session.user.role === "admin" ? " " : "Assigned Links"}
                 </h1>
               </div>
             </div>
@@ -245,11 +245,11 @@ export default function Dashboard() {
           {/* Header */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {session.user.role === "admin" ? "All Company Links" : "Your Assigned Links"}
+              {session.user.role === "admin" ? "Dashboard" : "Your Assigned Links"}
             </h2>
             <p className="text-gray-600">
               {session.user.role === "admin"
-                ? "Browse and manage all company resources"
+                ? ""
                 : "Access the links assigned to you by your administrator"}
             </p>
           </div>

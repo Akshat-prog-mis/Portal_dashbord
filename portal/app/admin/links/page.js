@@ -16,8 +16,7 @@ const PREDEFINED_CATEGORIES = [
 const INITIAL_FORM_DATA = {
   title: "",
   url: "",
-  category: "",
-  description: "" // Added missing description field
+  category: ""
 };
 
 // Loading skeleton component
@@ -210,21 +209,6 @@ const LinkForm = ({ editingLink, formData, setFormData, onSubmit, onCancel, isSu
           />
           {errors.url && <p className="mt-1 text-sm text-red-600">{errors.url}</p>}
         </div>
-
-        <div>
-          <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
-            Description
-          </label>
-          <textarea
-            id="description"
-            rows={4}
-            disabled={isSubmitting}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-            placeholder="Brief description of this link..."
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          />
-        </div>
         
         <div className="flex space-x-4 pt-4">
           <button
@@ -289,7 +273,6 @@ export default function AdminLinks() {
     return links.filter(link => {
       const matchesFilter = !filter || 
         link.title.toLowerCase().includes(filter.toLowerCase()) ||
-        link.description?.toLowerCase().includes(filter.toLowerCase()) ||
         link.url.toLowerCase().includes(filter.toLowerCase());
       
       const matchesCategory = !selectedCategory || link.category === selectedCategory;
@@ -314,12 +297,18 @@ export default function AdminLinks() {
       const method = editingLink ? "PUT" : "POST";
       const url = editingLink ? `/api/links/${editingLink.id}` : "/api/links";
 
+      const payload = {
+      ...formData,
+      description: " akshat"
+      };
+
+
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -346,7 +335,6 @@ export default function AdminLinks() {
       title: link.title || "",
       url: link.url || "",
       category: link.category || "",
-      description: link.description || "",
     });
     setShowForm(true);
   }, []);
@@ -430,7 +418,7 @@ export default function AdminLinks() {
                 <input
                   id="search"
                   type="text"
-                  placeholder="Search links by title, description, or URL..."
+                  placeholder="Search links by title, or URL..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
@@ -510,9 +498,6 @@ export default function AdminLinks() {
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-lg font-semibold text-gray-900">{link.title}</div>
-                        {link.description && (
-                          <div className="text-sm text-gray-600 mt-1 max-w-md">{link.description}</div>
-                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
