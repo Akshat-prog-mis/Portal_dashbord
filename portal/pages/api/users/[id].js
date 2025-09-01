@@ -1,4 +1,4 @@
-// pages/api/users/[id].js
+   // pages/api/users/[id].js
 // ====================
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";

@@ -128,7 +128,7 @@ export async function getLinks() {
     const { data, error } = await supabaseAdmin
       .from("links")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("title", { ascending: true });
 
     if (error) {
       console.error("Supabase error fetching links:", error);
