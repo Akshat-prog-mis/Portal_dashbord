@@ -126,9 +126,9 @@ export async function deleteUser(id) {
 export async function getLinks() {
   try {
     const { data, error } = await supabaseAdmin
-      .from("links")
-      .select("*")
-      .order("title", { ascending: true });
+    .from("links")
+    .select("category, title, url")
+    .order("title", { ascending: true });
 
     if (error) {
       console.error("Supabase error fetching links:", error);

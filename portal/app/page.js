@@ -195,7 +195,7 @@ export default function Dashboard() {
   const categories = Object.keys(safeCategorizedLinks).sort();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 ">
       {/* NAVIGATION HEADER */}
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -240,7 +240,7 @@ export default function Dashboard() {
       </nav>
 
       {/* MAIN CONTENT */}
-      <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8 bg-white dark:bg-gray-900 text-black dark:text-white p-4">
         <div className="px-4 sm:px-0">
           {/* Header */}
           <div className="text-center mb-8">
